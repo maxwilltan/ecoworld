@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EcoWorld Pile Efficiency &amp; Design Review</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- All styles, including font faces, in original cascade order. -->
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <section class="login-shell" id="loginPage">
+    <div class="login-brand-panel">
+      <div class="brand-lockup">
+        <div class="brand-mark">
+          <img src="assets/ecoworld-logo.jpg" alt="EcoWorld logo" />
+        </div>
+        <div>
+          <div class="brand-name">EcoWorld</div>
+        </div>
+      </div>
+
+      <div class="brand-copy">
+        <h1 class="login-main-title">PILE EFFICIENCY &amp; DESIGN REVIEW</h1>
+      </div>
+
+      <div class="brand-footer">Eco World Development Group Berhad</div>
+    </div>
+
+    <div class="login-form-panel">
+      <div class="login-card">
+        <p class="eyebrow">SECURE ACCESS</p>
+        <h2>Login</h2>
+
+        <form id="loginForm">
+          <label class="form-label" for="emailInput">Email</label>
+          <input id="emailInput" class="text-input" type="email" placeholder="name@ecoworld.com" required />
+
+          <label class="form-label" for="passwordInput">Password</label>
+          <input id="passwordInput" class="text-input" type="password" placeholder="Enter password" required />
+
+          <div class="error-text" id="loginError"></div>
+          <button class="primary-btn full" type="submit">Login</button>
+        </form>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="app-shell hidden" id="appShell">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="sidebar-brand">
+          <img src="assets/ecoworld-logo.jpg" alt="EcoWorld logo" />
+          <div class="sidebar-brand-copy">
+            <strong>EcoWorld</strong>
+            <small>Pile Efficiency Portal</small>
+          </div>
+        </div>
+
+        <button class="sidebar-toggle" id="sidebarToggle" type="button" title="Collapse sidebar">
+          <span>⇆</span>
+        </button>
+      </div>
+
+      <div class="sidebar-section-label">Account</div>
+      <div class="account-card">
+        <div class="account-card-main">
+          <div class="account-avatar" id="accountAvatar">E</div>
+          <div class="account-copy">
+            <strong id="accountRole">External</strong>
+            <small id="accountEmail">consultant@ecoworld.com</small>
+          </div>
+        </div>
+        <button class="account-logout-btn" type="button" id="logoutBtn" title="Log out" aria-label="Log out and return to login">
+          <span aria-hidden="true">↗</span><span class="logout-label-v147">Log out</span>
+        </button>
+      </div>
+
+      <nav class="side-nav" id="sideNav">
+        <button class="side-nav-btn consultant-nav-item active" type="button" data-view="overview">
+          <span class="nav-icon">▣</span>
+          <span class="nav-text">Submission</span>
+        </button>
+        <button class="side-nav-btn consultant-nav-item" type="button" data-view="history">
+          <span class="nav-icon">🕘</span>
+          <span class="nav-text">History</span>
+        </button>
+
+        <button class="side-nav-btn management-nav-item hidden" type="button" data-view="managementOverview">
+          <span class="nav-icon">▣</span>
+          <span class="nav-text">Overview</span>
+        </button>
+      </nav>
+    </aside>
+
+    <main class="main-shell" id="mainShell">
+      <section class="content-view" id="overviewView">
+        <div class="page-header compact-header">
+            <div>
+              <h1>Submission</h1>
+            </div>
+            <div class="header-pill" id="currentSelectionPill">No project selected</div>
+          </div>
+
+          <div class="filter-card compact-card">
+          <div class="filter-row filter-row-compact">
+            <div class="field-group">
+              <label for="regionSelect">Region</label>
+              <select id="regionSelect"></select>
+            </div>
+
+            <div class="field-group">
+              <label for="businessUnitSelect">Business Unit</label>
+              <select id="businessUnitSelect" disabled></select>
+            </div>
+
+            <div class="field-group">
+              <label for="projectSelect">Select Project</label>
+              <select id="projectSelect" disabled></select>
+            </div>
+
+            <div class="field-group field-grow">
+              <label for="projectSearchInput">Search Project</label>
+              <div class="project-search-wrap">
+                <input
+                  id="projectSearchInput"
+                  type="search"
+                  class="text-input"
+                  placeholder="Search project"
+                  autocomplete="off"
+                />
+                <div class="project-search-results hidden" id="projectSearchResults"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="inline-status" id="saveStatus">Choose a project to start.</div>
+        </div>
+
+        <div class="table-card compact-card">
+          <div class="table-card-head table-card-head-compact">
+            <div>
+              <h2>Submission Table</h2>
+            </div>
+
+            <div class="table-head-tools">
+              <div class="field-group table-revision-field">
+                <label for="revisionSelect">Revision</label>
+                <select id="revisionSelect" disabled>
+                  <option>Rev 0</option>
+                  <option>Rev 1</option>
+                  <option>Rev 2</option>
+                  <option>Rev 3</option>
+                </select>
+              </div>
+
+              <div class="field-group table-year-field">
+                <label for="yearSelect">Year</label>
+                <select id="yearSelect" disabled></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="submission-lock-notice" id="submissionLockNotice">
+            <span class="submission-lock-icon">▣</span>
+            <div>
+              <strong>Select a project first</strong>
+              <small>Choose Region, Business Unit and Project before filling in the submission.</small>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="overview-table">
+              <thead>
+                <tr>
+                  <th class="item-col">Item</th>
+                  <th class="value-col" id="valueColumnHeading">Current Revision</th>
+                </tr>
+              </thead>
+              <tbody id="overviewTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="table-actions compact-actions">
+            <button class="ghost-btn" type="button" id="clearFormBtn">Clear Form</button>
+            <button class="primary-btn" type="button" id="submitBtn">Submit</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="content-view hidden" id="historyView">
+        <div class="page-header compact-header">
+          <div>
+            <h1>History</h1>
+          </div>
+          <div class="header-pill" id="historyCountPill">0 submissions</div>
+        </div>
+
+        <div class="table-card compact-card">
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+      <section class="content-view hidden management-view" id="managementOverviewView">
+        <div class="page-header compact-header">
+          <div>
+            <h1>Overview &amp; Comparison</h1>
+          </div>
+          <div class="management-overview-header-actions">
+            <button class="ghost-btn compact-btn management-submission-setup-edit-btn" type="button" id="openManagementSubmissionSetupBtn">Add/Edit</button>
+            <div class="management-header-account" aria-label="Internal account">
+              <div class="management-header-account-copy">
+                <strong id="managementHeaderRole">Internal</strong>
+                <small id="managementHeaderEmail">management@ecoworld.com</small>
+              </div>
+              <button class="management-header-logout" type="button" id="managementHeaderLogoutBtn" title="Log out" aria-label="Log out and return to login">
+                <span aria-hidden="true">↗</span><span class="logout-label-v147">Log out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="management-stat-grid management-stat-grid-v101">
+          <div class="management-stat-card">
+            <span>Total Submissions</span>
+            <strong id="managementStatSubmissions">0</strong>
+          </div>
+          <div class="management-stat-card management-weekly-submissions-card" id="managementWeeklySubmissionsCard">
+            <button
+              type="button"
+              class="management-weekly-submissions-trigger"
+              id="managementWeeklySubmissionsTrigger"
+              aria-expanded="false"
+              aria-controls="managementWeeklySubmissionsPopover"
+            >
+              <span>This Week's Submissions</span>
+              <strong id="managementStatLatest">0</strong>
+              <span class="management-weekly-chevron" aria-hidden="true">⌄</span>
+            </button>
+            <div class="management-weekly-submissions-popover hidden" id="managementWeeklySubmissionsPopover">
+              <div class="management-weekly-submission-list" id="managementWeeklySubmissionList">
+                <small>No submissions this week.</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-card compact-card management-overview-filter">
+          <div class="filter-row filter-row-compact">
+            <div class="field-group">
+              <label for="managementOverviewRegionSelect">Region</label>
+              <select id="managementOverviewRegionSelect">
+                <option value="">All Regions</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="managementOverviewBusinessUnitSelect">Business Unit</label>
+              <select id="managementOverviewBusinessUnitSelect" disabled>
+                <option value="">Select region first</option>
+              </select>
+            </div>
+
+            <div class="field-group">
+              <label for="managementOverviewProjectMultiSelectTrigger">Select Project</label>
+              <div class="internal-project-multiselect" id="managementOverviewProjectMultiSelectV103">
+                <button
+                  class="internal-project-multiselect-trigger"
+                  type="button"
+                  id="managementOverviewProjectMultiSelectTrigger"
+                  aria-haspopup="true"
+                  aria-expanded="false"
+                  disabled
+                >
+                  <span id="managementOverviewProjectMultiSelectLabel">Select business unit first</span>
+                  <span class="internal-project-multiselect-chevron" aria-hidden="true">⌄</span>
+                </button>
+                <div class="internal-project-multiselect-panel hidden" id="managementOverviewProjectMultiSelectPanel">
+                  <div class="internal-project-multiselect-head">
+                    <span>Tick projects to compare</span>
+                    <button type="button" id="clearManagementProjectSelectionV103">Clear</button>
+                  </div>
+                  <div class="internal-project-multiselect-options" id="managementProjectCheckboxListV103"></div>
+                </div>
+              </div>
+              <select id="managementOverviewProjectSelect" class="internal-project-select-legacy" disabled aria-hidden="true" tabindex="-1">
+                <option value="">Select business unit first</option>
+              </select>
+            </div>
+
+            <div class="field-group field-grow">
+              <label for="managementOverviewProjectSearch">Search Project</label>
+              <div class="project-search-wrap management-project-search-wrap">
+                <span class="management-search-icon">⌕</span>
+                <input
+                  id="managementOverviewProjectSearch"
+                  type="search"
+                  class="text-input management-project-search-input"
+                  placeholder="Search project name"
+                  autocomplete="off"
+                />
+                <div
+                  class="project-search-results hidden"
+                  id="managementOverviewProjectSearchResults"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="table-card compact-card management-comparison-card management-combined-comparison-card" id="managementCombinedComparisonCardV101">
+          <div class="management-comparison-head management-combined-comparison-head">
+            <div>
+              <h2>Comparison</h2>
+              <small id="managementCombinedComparisonSummaryV101">Tick projects from Select Project to start comparing.</small>
+            </div>
+            <div class="management-comparison-head-actions">
+              <button
+                class="management-filter-toggle-btn"
+                type="button"
+                id="toggleComparisonFiltersBtn"
+                aria-expanded="true"
+                aria-controls="managementComparisonFilters"
+              >Filters <span aria-hidden="true">▴</span></button>
+              <div class="header-pill" id="comparisonColumnCountPill">0 projects</div>
+            </div>
+          </div>
+
+          <div
+            id="managementComparisonFilters"
+            class="management-comparison-filters"
+          ></div>
+
+          <div class="management-comparison-table-wrap">
+            <div class="management-comparison-empty" id="managementComparisonEmpty">
+              Tick projects from Select Project to start comparing.
+            </div>
+            <table class="management-comparison-table hidden" id="managementComparisonTable">
+              <thead id="managementComparisonHead"></thead>
+              <tbody id="managementComparisonBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="management-settings-modal hidden" id="managementSettingsModal" role="dialog" aria-modal="true" aria-labelledby="managementSettingsModalTitle">
+        <div class="management-settings-modal-dialog">
+          <div class="management-settings-modal-head">
+            <div>
+              <h2 id="managementSettingsModalTitle">Add/Edit</h2>
+            </div>
+            <button class="management-settings-modal-close" type="button" id="closeManagementSubmissionSetupBtn" aria-label="Close Add/Edit">×</button>
+          </div>
+          <div class="management-settings-modal-body" id="managementSettingsView">
+        <section class="edit-consultant-card-v31" aria-label="Consultant account">
+          <div class="edit-consultant-top-v31">
+            <div class="field-group">
+              <label for="editConsultantSelectV31">Select Consultant</label>
+              <select id="editConsultantSelectV31"></select>
+            </div>
+            <button type="button" class="small-btn soft" id="editAddConsultantV31">+ Add Consultant</button>
+            <span class="edit-account-state-v31" id="editAccountStateV31"></span>
+          </div>
+          <details class="edit-consultant-combined-v33 edit-consultant-combined-v34" id="editAccountDetailsV31">
+            <summary class="edit-consultant-combined-summary-v33 edit-consultant-combined-summary-v34">
+              <span>Details</span>
+            </summary>
+            <div class="edit-consultant-detail-grid-v32 edit-consultant-detail-grid-v33 edit-consultant-detail-grid-v34">
+              <section class="edit-account-panel-v33 edit-detail-panel-v34" aria-label="Account details and password">
+                <div class="edit-section-head-v34">
+                  <h3>Account details &amp; password</h3>
+                </div>
+                <div class="edit-account-fields-v31">
+                  <label><span>Account name</span><input class="text-input" id="editConsultantNameV31" autocomplete="off" /></label>
+                  <label><span>Login email</span><input class="text-input" id="editConsultantEmailV31" type="email" autocomplete="off" /></label>
+                  <label><span>Password</span><span class="edit-password-v31"><input class="text-input" id="editConsultantPasswordV31" type="password" autocomplete="new-password" /><button class="small-btn soft" type="button" id="editShowPasswordV31">Show</button></span></label>
+                  <div class="edit-account-actions-v31">
+                    <label class="edit-check-v31"><input id="editConsultantActiveV31" type="checkbox" /> Active account</label>
+                    <button class="edit-danger-btn-v31" type="button" id="editDeleteConsultantV31">Delete consultant</button>
+                  </div>
+                </div>
+              </section>
+              <section class="edit-project-section-v39 edit-detail-panel-v34" aria-label="Project">
+                <div class="edit-section-head-v34 edit-project-section-head-v39">
+                  <h3>Project</h3>
+                </div>
+                <div class="edit-project-columns-v39">
+                  <section class="edit-assigned-projects-v31 edit-project-column-v39" id="editAssignedProjectsV31" aria-label="Assigned Project">
+                    <span class="edit-hidden-v39" id="editAssignedCountV31" aria-hidden="true"></span>
+                    <button type="button" class="edit-hidden-v39" id="editAssignAllV31" tabindex="-1" aria-hidden="true">Assign all projects</button>
+                    <button type="button" class="edit-hidden-v39" id="editClearAssignmentsV31" tabindex="-1" aria-hidden="true">Clear assignments</button>
+                    <div id="editAssignedListV31"></div>
+                  </section>
+                  <section class="edit-past-panel-v31 edit-project-column-v39" id="editPastPanelV31" role="region" aria-label="Past Submission">
+                    <span class="edit-hidden-v39" id="editPastCountV31" aria-hidden="true"></span>
+                    <p class="edit-hidden-v39" id="editHistoryNoticeV31" aria-live="polite"></p>
+                    <div id="editPastListV31"></div>
+                  </section>
+                </div>
+              </section>
+            </div>
+          </details>
+          <div class="error-text" id="editAccessErrorV31" role="alert"></div>
+        </section>
+        <div class="management-settings-modal-selection-row">
+          <div class="header-pill" id="managementSettingsSelectionPill">No project selected</div>
+        </div>
+
+        <div class="filter-card compact-card">
+          <div class="filter-row filter-row-compact">
+            <div class="field-group">
+              <label for="managementSettingsRegionSelect">Region</label>
+              <div class="management-settings-select-edit-row">
+                <select id="managementSettingsRegionSelect"></select>
+                <button class="management-inline-icon-btn" type="button" id="addManagementSettingsRegionBtn" title="Add Region" aria-label="Add Region">＋</button>
+                <button class="management-inline-icon-btn danger" type="button" id="removeManagementSettingsRegionBtn" title="Remove selected Region" aria-label="Remove selected Region">×</button>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="managementSettingsBusinessUnitSelect">Business Unit</label>
+              <div class="management-settings-select-edit-row">
+                <select id="managementSettingsBusinessUnitSelect" disabled></select>
+                <button class="management-inline-icon-btn" type="button" id="addManagementSettingsBusinessUnitBtn" title="Add Business Unit" aria-label="Add Business Unit">＋</button>
+                <button class="management-inline-icon-btn danger" type="button" id="removeManagementSettingsBusinessUnitBtn" title="Remove selected Business Unit" aria-label="Remove selected Business Unit">×</button>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="managementSettingsProjectSelect">Select Project</label>
+              <div class="management-settings-select-edit-row">
+                <select id="managementSettingsProjectSelect" disabled></select>
+                <button class="management-inline-icon-btn" type="button" id="addManagementSettingsProjectBtn" title="Add Project" aria-label="Add Project">＋</button>
+                <button class="management-inline-icon-btn danger" type="button" id="removeManagementSettingsProjectBtn" title="Remove selected Project" aria-label="Remove selected Project">×</button>
+              </div>
+            </div>
+
+            <div class="field-group field-grow">
+              <label for="managementSettingsProjectSearch">Search Project</label>
+              <div class="project-search-wrap">
+                <input
+                  id="managementSettingsProjectSearch"
+                  type="search"
+                  class="text-input"
+                  placeholder="Search project"
+                  autocomplete="off"
+                />
+                <div class="project-search-results hidden" id="managementSettingsProjectSearchResults"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="inline-status edit-hidden-v39" id="managementSettingsStatus" aria-hidden="true"></div>
+          <div class="edit-assignment-v31">
+            <label class="edit-check-v31"><input id="editAssignProjectV31" type="checkbox" disabled /> <span id="editAssignProjectLabelV31">Assign this project to this consultant</span></label>
+            <span class="edit-hidden-v39" id="editAssignmentHintV31" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="table-card compact-card management-settings-submission-card" id="editSetupPanelV31" role="tabpanel" aria-labelledby="editSetupTabV31">
+          <div class="table-card-head table-card-head-compact">
+            <div>
+              <h2>Submission Table</h2>
+            </div>
+
+            <div class="table-head-tools">
+              <div class="field-group table-revision-field">
+                <label for="managementSettingsRevisionSelect">Revision</label>
+                <div class="management-settings-select-edit-row revision-edit-row">
+                  <select id="managementSettingsRevisionSelect"></select>
+                  <button class="management-inline-icon-btn" type="button" data-edit-management-dropdown="revision" title="Edit Revision dropdown" aria-label="Edit Revision dropdown">✎</button>
+                </div>
+                <div class="management-inline-dropdown-editor hidden" id="managementSettingsRevisionEditor"></div>
+              </div>
+
+              <div class="field-group table-year-field">
+                <label for="managementSettingsYearSelect">Year</label>
+                <select id="managementSettingsYearSelect"></select>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table class="overview-table management-settings-submission-table">
+              <thead>
+                <tr>
+                  <th class="item-col">Item</th>
+                  <th class="value-col" id="managementSettingsValueHeading">Current Revision</th>
+                </tr>
+              </thead>
+              <tbody id="managementConsultantTableSettingsBody"></tbody>
+            </table>
+          </div>
+        </div>
+</div>
+          <div class="edit-footer-v31">
+            <div><strong id="editSaveStatusV31" role="status">Consultant access is up to date.</strong></div>
+            <button type="button" class="primary-btn compact-btn" id="editSaveAccessV31">Save access</button>
+          </div>
+          <div class="edit-close-prompt-v31 hidden" id="editClosePromptV31" role="alert">
+            <strong>You have unsaved consultant access changes.</strong>
+            <div><button type="button" class="small-btn" id="editSaveCloseV31">Save &amp; close</button><button type="button" class="small-btn soft" id="editDiscardCloseV31">Discard access changes</button><button type="button" class="small-btn soft" id="editKeepEditingV31">Keep editing</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="management-settings-modal hidden" id="managementPileReferenceModalV124" role="dialog" aria-modal="true" aria-labelledby="managementPileReferenceModalTitleV124">
+        <div class="management-settings-modal-dialog pile-reference-modal-dialog-v124">
+          <div class="management-settings-modal-head">
+            <div>
+              <h2 id="managementPileReferenceModalTitleV124">Pile Reference</h2>
+            </div>
+            <button class="management-settings-modal-close" type="button" id="closeManagementPileReferenceModalV124" aria-label="Close Pile Reference">×</button>
+          </div>
+          <div class="management-settings-modal-body pile-reference-modal-body-v124">
+            <section class="content-view pile-reference-modal-content-v124" id="managementPileReferenceView">
+              <div class="pile-reference-modal-toolbar-v124">
+                <p class="page-subtext">Manage pile type, size, capacity and reference price used by Consultant calculations and Internal Pile Check.</p>
+                <div class="management-page-actions">
+                  <button class="ghost-btn compact-btn" type="button" id="resetPileReferenceBtn">Reset Default</button>
+                  <button class="ghost-btn compact-btn" type="button" id="addPileReferenceRowBtn">+ Add Row</button>
+                  <button class="primary-btn compact-btn" type="button" id="savePileReferenceBtn">Save Reference</button>
+                </div>
+              </div>
+
+              <div class="table-card compact-card">
+                <div class="management-reference-note">
+                  Capacity / Pile in the Consultant Loading &amp; Capacity table is read directly from this reference.
+                </div>
+                <div class="management-reference-wrap">
+                  <table class="management-reference-table">
+                    <thead>
+                      <tr>
+                        <th>Pile Type</th>
+                        <th>Pile Size (mm)</th>
+                        <th>Capacity / Pile (kN)</th>
+                        <th>Average Price (RM/Pile)</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="managementPileReferenceBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+
+
+
+  <div class="modal-backdrop hidden" id="managementSubmissionModal">
+    <div class="management-submission-modal">
+      <div class="management-modal-head">
+        <div>
+          <p class="modal-eyebrow">CONSULTANT SUBMISSION</p>
+          <h2 id="managementSubmissionModalTitle">Submission</h2>
+          <p id="managementSubmissionModalMeta"></p>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeManagementSubmissionModal">×</button>
+      </div>
+      <div class="management-submission-modal-body" id="managementSubmissionModalBody"></div>
+      <div class="management-modal-footer">
+        <button class="primary-btn compact-btn" type="button" id="doneManagementSubmissionModal">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="managementDrawingFolderModal">
+    <div class="drawing-folder-modal" role="dialog" aria-modal="true" aria-labelledby="managementDrawingFolderModalTitle">
+      <div class="drawing-folder-modal-head">
+        <div>
+          <p class="modal-eyebrow">DRAWING FILES</p>
+          <h2 id="managementDrawingFolderModalTitle">Drawing Files</h2>
+          <p id="managementDrawingFolderModalMeta">Uploaded files</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close-btn"
+          id="closeManagementDrawingFolderModal"
+          aria-label="Close"
+        >×</button>
+      </div>
+
+      <div class="drawing-revision-selector-v147">
+        <label for="managementDrawingRevisionSelectV147">Drawing Revision</label>
+        <select id="managementDrawingRevisionSelectV147"></select>
+      </div>
+
+      <div class="drawing-folder-modal-body" id="managementDrawingFolderModalBody"></div>
+
+      <div class="drawing-folder-modal-footer">
+        <span>Files uploaded by the Consultant for this revision.</span>
+        <button
+          type="button"
+          class="primary-btn compact-btn"
+          id="doneManagementDrawingFolderModal"
+        >Done</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop hidden" id="managementPileCheckModal">
+    <div class="management-pile-modal">
+      <div class="management-modal-head">
+        <div>
+          <p class="modal-eyebrow">INTERNAL PILE CHECK</p>
+          <h2>Loading &amp; Capacity Optimisation</h2>
+          <p id="managementPileCheckMeta"></p>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeManagementPileCheckModal">×</button>
+      </div>
+
+      <div class="management-pile-summary">
+        <div>
+          <span>Estimated Saving</span>
+          <strong id="managementPileSaving">—</strong>
+          <small id="managementPileSavingHint">Based on current reference prices</small>
+        </div>
+        <div>
+          <span>Pile Quantity Difference</span>
+          <strong id="managementPileQuantityDifference">—</strong>
+          <small id="managementPileQuantityHint">Internal − Consultant</small>
+        </div>
+        <div>
+          <span>Pile Efficiency Difference</span>
+          <strong id="managementPileEfficiencyDifference">—</strong>
+          <small id="managementPileEfficiencyHint">Internal − Consultant</small>
+        </div>
+      </div>
+
+      <div class="management-pile-toolbar">
+        <div>
+          <strong>Internal Reference</strong>
+          <small>Auto-optimise or manually adjust the internal pile type, size and quantity for reference.</small>
+        </div>
+        <button class="primary-btn compact-btn" type="button" id="managementAutoOptimiseAll">Auto-Optimise All</button>
+      </div>
+
+      <div class="management-pile-table-wrap">
+        <table class="management-pile-table">
+          <colgroup>
+            <col class="mp-col-column" />
+            <col class="mp-col-loading" />
+            <col class="mp-col-type" />
+            <col class="mp-col-size" />
+            <col class="mp-col-no" />
+            <col class="mp-col-capacity" />
+            <col class="mp-col-efficiency" />
+            <col class="mp-col-cost" />
+            <col class="mp-col-type" />
+            <col class="mp-col-size" />
+            <col class="mp-col-no" />
+            <col class="mp-col-capacity" />
+            <col class="mp-col-efficiency" />
+            <col class="mp-col-cost" />
+            <col class="mp-col-action" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th rowspan="2">Column</th>
+              <th rowspan="2">Column Loading<br><small>(kN)</small></th>
+              <th colspan="6">Consultant Proposal</th>
+              <th colspan="7">Internal Reference</th>
+            </tr>
+            <tr>
+              <th>Type</th>
+              <th>Size</th>
+              <th>No.</th>
+              <th>Pile Capacity<br><small>(kN)</small></th>
+              <th>Efficiency</th>
+              <th>Cost</th>
+
+              <th>Type</th>
+              <th>Size</th>
+              <th>No.</th>
+              <th>Pile Capacity<br><small>(kN)</small></th>
+              <th>Efficiency</th>
+              <th>Cost</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="managementPileCheckBody"></tbody>
+        </table>
+      </div>
+
+      <div class="management-modal-footer split">
+        <small>Internal reference changes are saved automatically when this window is closed.</small>
+        <div>
+          <button class="primary-btn compact-btn" type="button" id="closeManagementPileCheckBottom">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-backdrop hidden" id="drawingFolderModal">
+    <div class="drawing-folder-modal" role="dialog" aria-modal="true" aria-labelledby="drawingFolderModalTitle">
+      <div class="drawing-folder-modal-head">
+        <div>
+          <p class="modal-eyebrow">DRAWING FILES</p>
+          <h2 id="drawingFolderModalTitle">Drawing Files</h2>
+          <p id="drawingFolderModalMeta">All uploaded revisions</p>
+        </div>
+
+        <button
+          type="button"
+          class="modal-close-btn"
+          id="closeDrawingFolderModal"
+          aria-label="Close"
+        >×</button>
+      </div>
+
+      <div class="drawing-revision-selector-v147">
+        <label for="drawingRevisionSelectV147">Drawing Revision</label>
+        <select id="drawingRevisionSelectV147"></select>
+      </div>
+
+      <div class="drawing-folder-modal-body" id="drawingFolderModalBody"></div>
+
+      <div class="drawing-folder-modal-footer">
+        <span>Files are grouped by revision.</span>
+        <button
+          type="button"
+          class="primary-btn compact-btn"
+          id="doneDrawingFolderModal"
+        >Done</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-backdrop hidden" id="poundageCalculatorModal">
+    <div class="poundage-calculator-modal" role="dialog" aria-modal="true" aria-labelledby="poundageCalculatorTitle">
+      <div class="poundage-calculator-head">
+        <div>
+          <p class="modal-eyebrow">POUNDAGE</p>
+          <h2 id="poundageCalculatorTitle">Poundage</h2>
+          <p id="poundageCalculatorSubtitle" class="hidden"></p>
+        </div>
+        <button type="button" class="modal-close-btn" id="closePoundageCalculatorModal" aria-label="Close">×</button>
+      </div>
+
+      <div class="poundage-form-grid">
+        <label class="poundage-input-card">
+          <span>Steel Weight</span>
+          <div class="poundage-input-with-unit">
+            <input id="poundageSteelWeightInput" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00" />
+            <strong>kg</strong>
+          </div>
+        </label>
+
+        <div class="poundage-formula-symbol" aria-hidden="true">÷</div>
+
+        <label class="poundage-input-card">
+          <span>Concrete Volume</span>
+          <div class="poundage-input-with-unit">
+            <input id="poundageConcreteVolumeInput" type="number" min="0" step="0.001" inputmode="decimal" placeholder="0.000" />
+            <strong>m³</strong>
+          </div>
+        </label>
+      </div>
+
+      <div class="poundage-result-panel">
+        <span>Calculated Poundage</span>
+        <strong id="poundageCalculatedResult">—</strong>
+        <small>Steel Weight ÷ Concrete Volume</small>
+      </div>
+
+      <div class="poundage-exceed-warning hidden" id="poundageExceedWarning">
+        <label for="poundageExceedReasonInput">Remark</label>
+        <textarea id="poundageExceedReasonInput" rows="3" placeholder="Enter remark..."></textarea>
+      </div>
+
+      <div class="poundage-calculator-error" id="poundageCalculatorError" aria-live="polite"></div>
+
+      <div class="poundage-calculator-footer">
+        <small>The source values are saved with this submission revision.</small>
+        <div>
+          <button type="button" class="ghost-btn compact-btn" id="cancelPoundageCalculatorModal">Cancel</button>
+          <button type="button" class="primary-btn compact-btn" id="applyPoundageCalculation">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-backdrop hidden" id="loadingCapacityModal">
+    <div class="loading-modal" role="dialog" aria-modal="true" aria-labelledby="loadingCapacityModalTitle">
+      <div class="loading-modal-head">
+        <div>
+          <p class="modal-eyebrow">PILE EFFICIENCY &amp; LOADING</p>
+          <h2 id="loadingCapacityModalTitle">Loading &amp; Capacity Table</h2>
+          <p>Select pile type and size. Capacity / Pile is supplied automatically.</p>
+        </div>
+        <button type="button" class="modal-close-btn" id="closeLoadingCapacityModal" aria-label="Close">×</button>
+      </div>
+
+      <div class="loading-summary-strip">
+        <div>
+          <span>Total Column Loading</span>
+          <strong id="modalTotalColumnLoading">0 kN</strong>
+        </div>
+        <div>
+          <span>Total Piles Capacity</span>
+          <strong id="modalTotalPilesCapacity">0 kN</strong>
+        </div>
+        <div>
+          <span>Overall Avg. Piles Efficiency</span>
+          <strong id="modalOverallPileEfficiency">0%</strong>
+        </div>
+      </div>
+
+      <div class="loading-toolbar">
+        <div class="loading-toolbar-copy">
+          <strong>Input Rows</strong>
+          <small>Capacity / Pile comes from Management. Total capacity and pile efficiency are calculated automatically.</small>
+        </div>
+        <div class="loading-toolbar-actions">
+          <button type="button" class="ghost-btn compact-btn" id="toggleExcelPasteBtn">Paste from Excel</button>
+          <button type="button" class="primary-btn compact-btn" id="addLoadingRowBtn">+ Add Row</button>
+        </div>
+      </div>
+
+      <div class="excel-paste-panel hidden" id="excelPastePanel">
+        <div class="excel-paste-head">
+          <div class="excel-paste-head-copy">
+            <div class="excel-paste-title-row">
+              <strong>Paste from Excel</strong>
+              <button
+                type="button"
+                class="info-icon-btn"
+                id="openExcelPasteGuideBtn"
+                aria-label="Show Excel paste example"
+                title="Show Excel paste example"
+              >i</button>
+            </div>
+            <small>Paste 5 columns: Column Numbering, Pile Type, Pile Size, No. of Piles, Column Loading.</small>
+          </div>
+          <button type="button" class="text-action-btn" id="clearExcelPasteBtn">Clear</button>
+        </div>
+
+        <textarea
+          id="excelPasteInput"
+          class="excel-paste-input"
+          placeholder="C1	Spun Piles	500	4	6500
+C2	RC Piles	200	3	1100"
+        ></textarea>
+
+        <div class="excel-paste-actions excel-paste-actions-end">
+          <button type="button" class="primary-btn compact-btn" id="importExcelRowsBtn">Import Rows</button>
+        </div>
+      </div>
+
+      <div class="excel-guide-modal hidden" id="excelGuideModal" aria-hidden="true">
+        <div class="excel-guide-card" role="dialog" aria-modal="true" aria-labelledby="excelGuideTitle">
+          <div class="excel-guide-card-head">
+            <div>
+              <p class="excel-guide-kicker">How to use Paste from Excel</p>
+              <h3 id="excelGuideTitle">Example format</h3>
+            </div>
+            <button type="button" class="modal-close-btn excel-guide-close" id="closeExcelPasteGuideBtn" aria-label="Close">×</button>
+          </div>
+
+          <div class="excel-guide-body">
+            <div class="excel-guide-copy">
+              <ol class="excel-guide-steps">
+                <li>Prepare your Excel table with exactly 5 columns.</li>
+                <li>The order must be: <strong>Column Numbering</strong>, <strong>Pile Type</strong>, <strong>Pile Size</strong>, <strong>No of Piles</strong>, and <strong>Column Loading</strong>.</li>
+                <li>Select the rows in Excel, copy them, then paste directly into the text box.</li>
+                <li>Header rows are accepted, so you can copy together with the yellow title row.</li>
+              </ol>
+            </div>
+            <div class="excel-guide-image-wrap">
+              <img src="assets/excel-paste-example.png" alt="Example Excel layout showing Column Numbering, Pile Type, Pile Size, No of Piles and Column Loading columns" class="excel-guide-image">
+            </div>
+          </div>
+
+          <div class="excel-guide-footer">
+            <button type="button" class="primary-btn compact-btn" id="closeExcelPasteGuideBtnSecondary">Got it</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="loading-table-wrap">
+        <table class="loading-capacity-table">
+          <thead>
+            <tr>
+              <th>Column<br>Numbering</th>
+              <th>Type</th>
+              <th>Pile Size<br><small>(mm)</small></th>
+              <th>No. Piles</th>
+              <th>Capacity / Pile<br><small>(kN)</small></th>
+              <th>Total Pile Capacity<br><small>(kN)</small></th>
+              <th>Column Loading Req.<br><small>(kN)</small></th>
+              <th>Pile Efficiency</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="loadingCapacityTableBody"></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="3">TOTAL / OVERALL</th>
+              <th id="loadingFooterTotalPiles">0</th>
+              <th>—</th>
+              <th id="loadingFooterCapacity">0</th>
+              <th id="loadingFooterLoading">0</th>
+              <th id="loadingFooterEfficiency">0%</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="loading-modal-footer">
+        <small>Changes are kept with the current submission revision.</small>
+        <div>
+          <button type="button" class="ghost-btn compact-btn" id="cancelLoadingCapacityModal">Close</button>
+          <button type="button" class="primary-btn compact-btn" id="saveLoadingCapacityModal">Submit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Read-only Poundage review for Internal/Management -->
+  <div class="modal-backdrop hidden" id="managementPoundageReviewModalV132">
+    <div class="management-poundage-review-modal-v132" role="dialog" aria-modal="true" aria-labelledby="managementPoundageReviewTitleV132">
+      <button type="button" class="management-poundage-review-close-v132" id="closeManagementPoundageReviewV132" aria-label="Close">×</button>
+      <div class="management-poundage-review-head-v132">
+        <span class="management-poundage-review-kicker-v132">POUNDAGE</span>
+        <h2 id="managementPoundageReviewTitleV132">Poundage</h2>
+        <p id="managementPoundageReviewMetaV132"></p>
+      </div>
+      <div class="management-poundage-review-body-v132">
+        <div class="management-poundage-review-value-v132">
+          <span>Final Value</span>
+          <strong id="managementPoundageReviewValueV132">—</strong>
+        </div>
+        <div class="management-poundage-review-input-grid-v133">
+          <div class="management-poundage-review-source-v133">
+            <span>Steel Weight, kg</span>
+            <strong id="managementPoundageReviewSteelV133">—</strong>
+          </div>
+          <div class="management-poundage-review-source-v133">
+            <span>Concrete Volume, m³</span>
+            <strong id="managementPoundageReviewConcreteV133">—</strong>
+          </div>
+        </div>
+        <div class="management-poundage-review-remark-v132">
+          <span>Remark</span>
+          <strong id="managementPoundageReviewRemarkV132">—</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="js/data.js"></script>
+  <script src="js/supabase-portal.js"></script>
+  <script src="js/consultant.js"></script>
+  <script src="js/management.js"></script>
+</body>
+</html>
