@@ -26,12 +26,46 @@ var openEcoFileDb = function openEcoFileDb(){
 };
 
 var saveEcoFileBlob = async function saveEcoFileBlob(blob, metadata = {}){
-  return EcoBackend.uploadFile(blob, metadata);
+  if(window.EcoBackend) return window.EcoBackend.uploadFile(blob, metadata);
+  const db = await openEcoFileDb();
+  const id = metadata.blobId || `file_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(ECO_FILE_DB_STORE, "readwrite");
+    tx.objectStore(ECO_FILE_DB_STORE).put({
+      id,
+      blob,
+      name: metadata.name || "Uploaded file",
+      type: metadata.type || blob.type || "application/octet-stream",
+      size: metadata.size ?? blob.size ?? 0,
+      lastModified: metadata.lastModified || Date.now(),
+      savedAt: new Date().toISOString()
+    });
+
+    tx.oncomplete = () => {
+      db.close();
+      resolve({
+        blobId: id,
+        name: metadata.name || "Uploaded file",
+        type: metadata.type || blob.type || "application/octet-stream",
+        size: metadata.size ?? blob.size ?? 0,
+        lastModified: metadata.lastModified || Date.now()
+      });
+    };
+
+    tx.onerror = () => {
+      const error = tx.error || new Error("Unable to store uploaded file.");
+      db.close();
+      reject(error);
+    };
+
+    tx.onabort = tx.onerror;
+  });
 };
 
 var getEcoFileBlob = async function getEcoFileBlob(blobId){
   if(!blobId) return null;
-  if(EcoBackend.isRemoteFile(blobId)) return EcoBackend.downloadFile(blobId);
+  if(window.EcoBackend) return window.EcoBackend.getFile(blobId);
   const db = await openEcoFileDb();
 
   return new Promise((resolve, reject) => {
@@ -53,6 +87,7 @@ var getEcoFileBlob = async function getEcoFileBlob(blobId){
 };
 
 var getAllEcoFileRecords = async function getAllEcoFileRecords(){
+  if(window.EcoBackend) return [];
   const db = await openEcoFileDb();
 
   return new Promise((resolve, reject) => {
@@ -110,6 +145,7 @@ var recoverEcoFileRecord = async function recoverEcoFileRecord(fileMeta){
 };
 
 var repairEcoFileReferences = function repairEcoFileReferences(fileMeta, recoveredRecord){
+  if(window.EcoBackend) return;
   if(!fileMeta || !recoveredRecord?.id || typeof getSubmissions !== "function" || typeof setSubmissions !== "function") return;
 
   const submissions = getSubmissions();
@@ -135,7 +171,7 @@ var repairEcoFileReferences = function repairEcoFileReferences(fileMeta, recover
   });
 
   if(changed){
-    setSubmissions(submissions).catch(error => console.error("Could not repair drawing references:", error));
+    setSubmissions(submissions);
   }
 
   if(typeof state !== "undefined" && state?.formData){
@@ -156,8 +192,11 @@ var repairEcoFileReferences = function repairEcoFileReferences(fileMeta, recover
 
 var deleteEcoFileBlob = async function deleteEcoFileBlob(blobId){
   if(!blobId) return;
+  if(window.EcoBackend) return window.EcoBackend.deleteFile(blobId);
+  const db = await openEcoFileDb();
 
-  // Saved and archived drawings cannot be removed by stale form controls.
+  // Check after opening the database so saved/current and archived drawings
+  // cannot be removed by stale form controls or another record's cleanup.
   const referenced = typeof getSubmissions === "function" && getSubmissions().some(item =>
     [item,...(item.previousVersions || [])].some(version =>
       ["drawingArchitectural","drawingStructural"].some(key => {
@@ -167,9 +206,7 @@ var deleteEcoFileBlob = async function deleteEcoFileBlob(blobId){
       })
     )
   );
-  if(referenced) return;
-  if(EcoBackend.isRemoteFile(blobId)) return EcoBackend.deleteFile(blobId);
-  const db = await openEcoFileDb();
+  if(referenced){ db.close(); return; }
 
   return new Promise((resolve, reject) => {
     const tx = db.transaction(ECO_FILE_DB_STORE, "readwrite");
@@ -238,7 +275,7 @@ var openEcoStoredFile = async function openEcoStoredFile(fileMeta){
   }
 
   if(!fileMeta.blobId){
-    alert("This file is no longer available in browser storage.");
+    alert("This file is no longer available.");
     return;
   }
 
@@ -249,7 +286,7 @@ var openEcoStoredFile = async function openEcoStoredFile(fileMeta){
     const record = await recoverEcoFileRecord(fileMeta);
     if(!record?.blob){
       if(previewWindow) previewWindow.close();
-      alert("This drawing file is no longer available in this browser. Please re-upload it from the Consultant submission if needed.");
+      alert("This drawing file is no longer available. Please re-upload it from the Consultant submission if needed.");
       return;
     }
 
@@ -327,8 +364,12 @@ var populateYearSelect = function populateYearSelect(){
 };
 
 var loadStorage = function loadStorage(key, fallback){
-  if(key === ECO_FRESH_STORAGE.auth) return fallback;
-  if(key !== ECO_FRESH_STORAGE.sidebar) return EcoBackend.value(key, fallback);
+  if(window.EcoBackend && key !== ECO_FRESH_STORAGE.sidebar){
+    if(key === ECO_FRESH_STORAGE.auth) return null;
+    if(key === ECO_FRESH_STORAGE.submissions) return window.EcoBackend.submissions();
+    if(key === ECO_FRESH_STORAGE.consultantAccess) return window.EcoBackend.accounts() || fallback;
+    return window.EcoBackend.setting(key, fallback);
+  }
   try{
     const raw = localStorage.getItem(key);
     return raw ? JSON.parse(raw) : fallback;
@@ -338,9 +379,12 @@ var loadStorage = function loadStorage(key, fallback){
 };
 
 var saveStorage = function saveStorage(key, value){
-  if(key === ECO_FRESH_STORAGE.auth) return;
-  if(key !== ECO_FRESH_STORAGE.sidebar){
-    return EcoBackend.saveValue(key, value).catch(error => console.error("Supabase setting save failed:", error));
+  if(window.EcoBackend && key !== ECO_FRESH_STORAGE.sidebar){
+    if(key === ECO_FRESH_STORAGE.auth) return;
+    if(key === ECO_FRESH_STORAGE.submissions || key === ECO_FRESH_STORAGE.consultantAccess){
+      throw new Error("Use the secure backend operation for this change.");
+    }
+    return window.EcoBackend.saveSetting(key, value);
   }
   try{
     localStorage.setItem(key, JSON.stringify(value));
@@ -390,16 +434,23 @@ var defaultFormData = function defaultFormData(){
 };
 
 var getSubmissions = function getSubmissions(){
+  if(window.EcoBackend) return window.EcoBackend.submissions();
   return loadStorage(ECO_FRESH_STORAGE.submissions, []);
 };
 
-var setSubmissions = async function setSubmissions(items){
-  await EcoBackend.persistSubmissions(items);
+var setSubmissions = function setSubmissions(items){
+  // setItem is atomic: a quota failure must leave the saved history untouched.
+  saveStorage(ECO_FRESH_STORAGE.submissions, items);
 };
 
 var setAuth = function setAuth(auth){
   state.auth = auth;
-  if(!auth) void EcoBackend.signOut();
+  if(window.EcoBackend) return;
+  if(auth){
+    saveStorage(ECO_FRESH_STORAGE.auth, auth);
+  }else{
+    localStorage.removeItem(ECO_FRESH_STORAGE.auth);
+  }
 };
 
 var applySidebarState = function applySidebarState(){
@@ -1387,7 +1438,7 @@ var renderOverviewTable = function renderOverviewTable(){
                 class="section-open-table-btn"
                 data-open-loading-table="section"
               >
-                Detailed Loading Table →
+                Pile Efficiency Table →
               </button>
             ` : ""}
           </div>
@@ -1899,37 +1950,29 @@ var saveSubmission = async function saveSubmission(options = {}){
   let payload = null;
 
   try{
-    await EcoBackend.refreshSubmissions();
     const all = getSubmissions();
-    const originalRecords = JSON.stringify(all);
     const existing = assertSubmissionSaveAllowedV31(null,all);
-    const existingIndex = existing ? all.findIndex(item => item.id === existing.id) : -1;
-    payload = finaliseSubmissionVersionV31(buildSubmissionPayload(existing?.id || null),existing);
-
-    // Migrate any legacy base64 drawing data out of localStorage before saving.
-    await migrateSubmissionDrawingFiles([payload]);
-    assertSubmissionSaveAllowedV31(payload,getSubmissions());
-
-    if(existingIndex >= 0){
-      all[existingIndex] = payload;
+    if(window.EcoBackend){
+      payload = await window.EcoBackend.saveSubmission(
+        buildSubmissionPayload(existing?.id || null),
+        existing?.versionNumber || null
+      );
     }else{
-      all.unshift(payload);
+      const originalRecords = JSON.stringify(all);
+      const existingIndex = existing ? all.findIndex(item => item.id === existing.id) : -1;
+      payload = finaliseSubmissionVersionV31(buildSubmissionPayload(existing?.id || null),existing);
+      await migrateSubmissionDrawingFiles([payload]);
+      assertSubmissionSaveAllowedV31(payload,getSubmissions());
+      if(existingIndex >= 0) all[existingIndex] = payload;
+      else all.unshift(payload);
+      await migrateSubmissionDrawingFiles(all.flatMap(item => [item,...(item.previousVersions || [])]));
+      const latest = getSubmissions();
+      assertSubmissionSaveAllowedV31(payload,latest);
+      if(JSON.stringify(latest) !== originalRecords){
+        throw new Error("The saved submissions changed while saving. Please reopen your submission and try again.");
+      }
+      setSubmissions(all);
     }
-
-    // Include snapshots when migrating, preserving drawing references in every version.
-    await migrateSubmissionDrawingFiles(all.flatMap(item => [item,...(item.previousVersions || [])]));
-
-    // Re-read after every awaited storage operation: a different tab may have
-    // revoked access or submitted a newer version while files were migrating.
-    const latest = getSubmissions();
-    assertSubmissionSaveAllowedV31(payload,latest);
-    if(JSON.stringify(latest) !== originalRecords){
-      throw new Error("The saved submissions changed while saving. Please reopen your submission and try again.");
-    }
-
-    // Keep the persistence operation isolated from rendering/popup code so a
-    // UI error can never be reported as a failed save.
-    await setSubmissions(all);
     state.formData = structuredClone(payload.formData);
     state.editingId = payload.id;
     state.loadedSubmissionTokenV31 = submissionContentTokenV31(payload);
@@ -2043,7 +2086,8 @@ var permanentlyDeleteSubmissionV141 = async function permanentlyDeleteSubmission
 
   const submissions = getSubmissions();
   const next = submissions.filter(entry => entry.id !== item.id);
-  await setSubmissions(next);
+  if(window.EcoBackend) await window.EcoBackend.deleteSubmission(item.id);
+  else setSubmissions(next);
 
   // Remove uploaded file blobs as a best-effort cleanup. A failed blob cleanup
   // must not bring the deleted submission back into History.
@@ -3027,14 +3071,12 @@ var normaliseStoredConsultantAccountV144 = function normaliseStoredConsultantAcc
 };
 
 var getConsultantAccessSettings = function getConsultantAccessSettings(){
-  const serverSettings = EcoBackend.value(ECO_FRESH_STORAGE.consultantAccess, null);
-  if(serverSettings?.accounts) return serverSettings;
   const defaults = defaultConsultantAccessSettingsV139();
   const stored = loadStorage(ECO_FRESH_STORAGE.consultantAccess, null);
 
-  // First run only: seed the three initial consultant accounts.
-  // After Internal saves the account list, the stored list becomes the source of truth,
-  // so deleting any of the original three accounts is permanent.
+  // First run only: no consultants are seeded by default. Once Internal
+  // saves the account list (adding consultants via the Management page),
+  // the stored list becomes the source of truth.
   if(!stored?.accounts){
     return defaults;
   }
@@ -3065,7 +3107,15 @@ var getConsultantAccessSettings = function getConsultantAccessSettings(){
 };
 
 var saveConsultantAccessSettings = async function saveConsultantAccessSettings(settings){
-  await EcoBackend.saveAccounts(settings);
+  if(window.EcoBackend) return await window.EcoBackend.saveAccounts(settings);
+  const clean = {
+    version:3,
+    accounts: settings?.accounts || {},
+    accountOrder: Array.isArray(settings?.accountOrder)
+      ? [...settings.accountOrder]
+      : Object.keys(settings?.accounts || {})
+  };
+  saveStorage(ECO_FRESH_STORAGE.consultantAccess, clean);
 };
 
 var consultantAccountsInOrderV144 = function consultantAccountsInOrderV144(settings=getConsultantAccessSettings()){
@@ -3175,8 +3225,34 @@ var getConsultantAccessibleRegionBusinessUnits = function getConsultantAccessibl
 };
 
 var findPortalLoginAccountV144 = function findPortalLoginAccountV144(email,password){
-  // Password checking is handled exclusively by Supabase Auth.
-  return null;
+  const cleanEmail = String(email || "").trim().toLowerCase();
+  const cleanPassword = String(password || "");
+
+  const management = DEMO_ACCOUNTS.management;
+  if(
+    management &&
+    management.email.toLowerCase() === cleanEmail &&
+    management.password === cleanPassword
+  ){
+    return management;
+  }
+
+  const account = consultantAccountsInOrderV144().find(item =>
+    item.active &&
+    item.email &&
+    item.email.toLowerCase() === cleanEmail &&
+    item.password === cleanPassword
+  );
+
+  return account
+    ? {
+        id:account.id,
+        name:account.name,
+        email:account.email,
+        password:account.password,
+        role:"Consultant"
+      }
+    : null;
 };
 
 var cloneConsultantAccessV139 = function cloneConsultantAccessV139(value){
@@ -3202,16 +3278,16 @@ var validateConsultantAccessDraftV144 = function validateConsultantAccessDraftV1
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(account.email)){
       return {ok:false,id:account.id,message:`Enter a valid login email for ${account.name}.`};
     }
-    if(account.email === String(EcoBackend.profile?.email || DEMO_ACCOUNTS.management.email).toLowerCase()){
+    if(account.email === String(DEMO_ACCOUNTS.management.email).toLowerCase()){
       return {ok:false,id:account.id,message:"This email is already used by the Internal account."};
     }
     if(emails.has(account.email)){
       return {ok:false,id:account.id,message:"Each consultant must use a unique login email."};
     }
     emails.add(account.email);
-    const existing = getConsultantAccessSettings().accounts?.[account.id];
-    if((!existing || account.password) && account.password.length < 8){
-      return {ok:false,id:account.id,message:`Password for ${account.name} must contain at least 8 characters.`};
+    const existingAccount = window.EcoBackend?.accounts()?.accounts?.[account.id];
+    if((!existingAccount || account.password) && account.password.length < 8){
+      return {ok:false,id:account.id,message:`Temporary password for ${account.name} must contain at least 8 characters.`};
     }
   }
 
@@ -3333,7 +3409,7 @@ var finaliseSubmissionVersionV31 = function finaliseSubmissionVersionV31(payload
 
 var managementSetSubmissionEditingV31 = async function managementSetSubmissionEditingV31(id,allowed){
   if(state.auth?.role !== "Management") throw new Error("Only Management can change submission editing access.");
-  await EcoBackend.refreshSubmissions();
+  if(window.EcoBackend) return await window.EcoBackend.setEdit(id,allowed);
   const items = getSubmissions();
   const item = items.find(entry => String(entry.id) === String(id));
   if(!item) throw new Error("Submission not found. Please refresh the list.");
@@ -3344,7 +3420,7 @@ var managementSetSubmissionEditingV31 = async function managementSetSubmissionEd
   item.audit = [...(item.audit || []),{
     action:allowed === true ? "editing_allowed" : "editing_locked",at:now,by
   }];
-  await setSubmissions(items);
+  setSubmissions(items);
   return item;
 };
 
@@ -3520,6 +3596,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 /* ---- js/consultant/events.js ---- */
 var returnToLoginV147 = function returnToLoginV147(){
+  if(window.EcoBackend) window.EcoBackend.signOut();
   setAuth(null);
   $("appShell").classList.add("hidden");
   $("loginPage").classList.remove("hidden");
@@ -3554,40 +3631,25 @@ window.addEventListener("popstate", () => {
 var bindEvents = function bindEvents(){
   $("loginForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+
     const email = $("emailInput").value.trim().toLowerCase();
     const password = $("passwordInput").value;
-    const button = $("loginForm").querySelector('button[type="submit"]');
-    button.disabled = true;
-    $("loginError").textContent = "";
-    try{
-      const auth = await EcoBackend.signIn(email,password);
-      setAuth(auth);
-      launchApp();
-    }catch(error){
-      $("loginError").textContent = error.message || "Could not log in. Please try again.";
-    }finally{
-      button.disabled = false;
-    }
-  });
-
-  document.querySelector(".demo-box")?.addEventListener("click", event => {
-    const btn = event.target.closest(".demo-account");
-    if(!btn) return;
-
-    const consultantId = btn.dataset.consultantLoginId;
-    if(consultantId && typeof getConsultantAccessSettings === "function"){
-      const account = getConsultantAccessSettings().accounts?.[consultantId];
-      if(!account) return;
-      $("emailInput").value = account.email || "";
-      $("passwordInput").value = "";
-      $("passwordInput").focus();
+    if(window.EcoBackend){
+      const button = $("loginForm").querySelector('button[type="submit"]');
+      button.disabled = true;
+      try{
+        const auth = await window.EcoBackend.signIn(email,password);
+        setAuth(auth);
+        $("loginError").textContent = "";
+        launchApp();
+      }catch(error){
+        $("loginError").textContent = error?.message || "Unable to sign in.";
+      }finally{
+        button.disabled = false;
+      }
       return;
     }
-
-    const demo = DEMO_ACCOUNTS[btn.dataset.demo];
-    if(!demo) return;
-    $("emailInput").value = demo.email;
-    $("passwordInput").value = demo.password;
+    $("loginError").textContent = "The Supabase connection is unavailable. Reload the page or contact Management.";
   });
 
   $("logoutBtn").addEventListener("click", () => {
@@ -4028,10 +4090,15 @@ bindEvents();
 bindPoundageCalculatorEvents();
 // Management modules below this script finish installing their overrides first.
 document.addEventListener("DOMContentLoaded", async () => {
-  const auth = await EcoBackend.restore();
-  if(auth){
-    setAuth(auth);
-    launchApp();
+  if(!window.EcoBackend){
+    $("loginError").textContent = "The Supabase connection is unavailable. Reload the page or contact Management.";
+    return;
+  }
+  try{
+    const auth = await window.EcoBackend.restore();
+    if(auth){ setAuth(auth); launchApp(); }
+  }catch(error){
+    $("loginError").textContent = error?.message || "Please sign in again.";
   }
 });
 ;

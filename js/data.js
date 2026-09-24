@@ -25,37 +25,11 @@ const ECO_FRESH_STORAGE = {
 const PILE_EFFICIENCY_TARGET_MIN = 0.80;
 const PILE_EFFICIENCY_TARGET_MAX = 0.90;
 
-const CONSULTANT_ACCOUNT_DEFINITIONS = [
-  {
-    id: "jsw",
-    name: "JSW",
-    email: "jsw@consultant.com"
-  },
-  {
-    id: "lnl",
-    name: "Perunding LNL Sdn. Bhd",
-    email: "lnl@consultant.com"
-  },
-  {
-    id: "primareka",
-    name: "Jurutera Perunding Primareka Sdn Bhd",
-    email: "primareka@consultant.com"
-  }
-];
+/* No seeded consultant demo accounts. Consultants are created from the
+   Management page's Consultant Access editor instead. */
+const CONSULTANT_ACCOUNT_DEFINITIONS = [];
 
 const DEMO_ACCOUNTS = {
-  consultantJsw: {
-    ...CONSULTANT_ACCOUNT_DEFINITIONS[0],
-    role: "Consultant"
-  },
-  consultantLnl: {
-    ...CONSULTANT_ACCOUNT_DEFINITIONS[1],
-    role: "Consultant"
-  },
-  consultantPrimareka: {
-    ...CONSULTANT_ACCOUNT_DEFINITIONS[2],
-    role: "Consultant"
-  },
   management: {
     id: "management",
     name: "Internal",

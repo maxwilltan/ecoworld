@@ -906,7 +906,7 @@ var managementComparisonDisplay = function managementComparisonDisplay(item,entr
 };
 
 var saveManagementPileReference = function saveManagementPileReference(rows){
-  saveStorage(
+  return saveStorage(
     ECO_FRESH_STORAGE.pileReference,
     rows
   );
@@ -1905,8 +1905,8 @@ document.addEventListener("DOMContentLoaded", () => {
   $("saveConsultantTableSettings")
     ?.addEventListener(
       "click",
-      () => {
-        saveStorage(
+      async () => {
+        await saveStorage(
           ECO_FRESH_STORAGE.tableSettings,
           collectManagementSettings()
         );
@@ -1922,7 +1922,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("resetConsultantTableSettings")
     ?.addEventListener(
       "click",
-      () => {
+      async () => {
         if(
           !confirm(
             "Reset Consultant table settings to default?"
@@ -1931,8 +1931,11 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        EcoBackend.removeValue(ECO_FRESH_STORAGE.tableSettings)
-          .catch(error => alert(`Could not reset settings: ${error.message}`));
+        if(window.EcoBackend){
+          await saveStorage(ECO_FRESH_STORAGE.tableSettings, defaultConsultantTableSettings());
+        }else{
+          localStorage.removeItem(ECO_FRESH_STORAGE.tableSettings);
+        }
 
         renderManagementSettings();
       }
@@ -1981,7 +1984,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("savePileReferenceBtn")
     ?.addEventListener(
       "click",
-      () => {
+      async () => {
         const rows =
           collectManagementPileReference();
 
@@ -1992,7 +1995,7 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        saveManagementPileReference(rows);
+        await saveManagementPileReference(rows);
         renderManagementPileReference();
 
         alert(
@@ -2004,7 +2007,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("resetPileReferenceBtn")
     ?.addEventListener(
       "click",
-      () => {
+      async () => {
         if(
           !confirm(
             "Reset Pile Reference to default values?"
@@ -2013,8 +2016,12 @@ document.addEventListener("DOMContentLoaded", () => {
           return;
         }
 
-        EcoBackend.removeValue(ECO_FRESH_STORAGE.pileReference)
-          .catch(error => alert(`Could not reset pile reference: ${error.message}`));
+        if(window.EcoBackend){
+          await saveStorage(ECO_FRESH_STORAGE.pileReference,
+            MANAGEMENT_PILE_CAPACITY_REFERENCE.map(item => ({...item})));
+        }else{
+          localStorage.removeItem(ECO_FRESH_STORAGE.pileReference);
+        }
 
         renderManagementPileReference();
       }
@@ -8224,7 +8231,7 @@ document.addEventListener("DOMContentLoaded",()=>{
       status("Consultant details and project assignments saved.");
       return true;
     }catch(error){
-      el("editAccessErrorV31").textContent = error?.message || "Could not save consultant access.";
+      el("editAccessErrorV31").textContent = error?.message || "Could not save consultant access. Please try again.";
       return false;
     }
   }
